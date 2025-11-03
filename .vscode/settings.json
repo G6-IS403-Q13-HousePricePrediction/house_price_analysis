@@ -1,0 +1,9 @@
+{
+    "python.terminal.activateEnvironment": true,
+    "python.venvPath": "${workspaceFolder}/.venv",
+    "files.exclude": {
+      "**/.venv": true,
+      "**/.ipynb_checkpoints": true,
+      "**/__pycache__": true
+    }
+}
