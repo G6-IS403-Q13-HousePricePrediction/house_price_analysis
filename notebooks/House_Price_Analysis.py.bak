@@ -40,8 +40,6 @@ import lightgbm as lgb
 import warnings
 warnings.filterwarnings('ignore')
 
-sns.set_theme()
-
 # %%
 DATA_DIR = '../data/'
 SUBMISSIONS_DIR = '../submissions/'
