@@ -559,45 +559,44 @@ X_preprocessed = pipeline.fit_transform(X)
 X_train, X_test, y_train, y_test = train_test_split(
     X_preprocessed, y, test_size=0.2, random_state=25)
 
-# %%
-RFR = RandomForestRegressor(random_state=13)
+ridge = Ridge()
 
 # %%
-param_grid_RFR = {
-    'max_depth': [5, 10, 15],
-    'n_estimators': [100, 250, 500],
-    'min_samples_split': [3, 5, 10]
+param_grid_ridge = {
+    'alpha': [0.05, 0.1, 1, 3, 5, 10],
+    'solver': ['auto', 'svd', 'cholesky', 'lsqr', 'sparse_cg', 'sag']
 }
 
 # %%
-rfr_cv = GridSearchCV(RFR, param_grid_RFR, cv=5,
-                      scoring='neg_mean_squared_error', n_jobs=-1)
+ridge_cv = GridSearchCV(ridge, param_grid_ridge, cv=5,
+                        scoring='neg_mean_squared_error', n_jobs=-1)
 
 # %%
-rfr_cv.fit(X_train, y_train)
+ridge_cv.fit(X_train, y_train)
 
 # %%
-rfr_cv.best_params_
+ridge_cv.best_params_
+np.sqrt(-1 * ridge_cv.best_score_)
 
 # %%
-best_rfr_model = rfr_cv.best_estimator_
+best_ridge_model = ridge_cv.best_estimator_
 
 # %%
-best_rfr_model.fit(X_train, y_train)
+best_ridge_model.fit(X_train, y_train)
 
 # %%
-y_pred_rfr = best_rfr_model.predict(X_test)
+y_pred_ridge = best_ridge_model.predict(X_test)
 
 # %%
-rmse_rfr = np.sqrt(mean_squared_error(y_test, y_pred_rfr))
-print(f"RSME: {rmse_rfr:.4f}")
+rmse_ridge = np.sqrt(mean_squared_error(y_test, y_pred_ridge))
+print(f"RSME: {rmse_ridge:.4f}")
 
 # %%
 df_test_preprocess = pipeline.transform(test_df)
 
 # %%
-y_rfr = np.exp(best_rfr_model.predict(df_test_preprocess))
+y_ridge = np.exp(best_ridge_model.predict(df_test_preprocess))
 
-df_y_rfr_out = test_df[['Id']]
-df_y_rfr_out['SalePrice'] = y_rfr
-df_y_rfr_out.to_csv(SUBMISSIONS_DIR + 'random_forest.csv', index=False)
+df_y_ridge_out = test_df[['Id']]
+df_y_ridge_out['SalePrice'] = y_ridge
+df_y_ridge_out.to_csv(SUBMISSIONS_DIR + 'ridge.csv', index=False)

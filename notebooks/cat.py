@@ -35,7 +35,7 @@ from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor, V
 from xgboost import XGBRegressor
 from catboost import CatBoostRegressor
 
-import lightgbm as lgb
+from lightgbm import LGBMRegressor
 
 # %%
 DATA_DIR = '../data/'
@@ -560,44 +560,40 @@ X_train, X_test, y_train, y_test = train_test_split(
     X_preprocessed, y, test_size=0.2, random_state=25)
 
 # %%
-RFR = RandomForestRegressor(random_state=13)
+catboost = CatBoostRegressor(loss_function='RMSE', verbose=False)
 
 # %%
-param_grid_RFR = {
-    'max_depth': [5, 10, 15],
-    'n_estimators': [100, 250, 500],
-    'min_samples_split': [3, 5, 10]
+param_grid_cat = {
+    'iterations': [100, 500, 1000],
+    'depth': [4, 6, 8, 10],
+    'learning_rate': [0.01, 0.05, 0.1, 0.5]
 }
 
 # %%
-rfr_cv = GridSearchCV(RFR, param_grid_RFR, cv=5,
+cat_cv = GridSearchCV(catboost, param_grid_cat, cv=3,
                       scoring='neg_mean_squared_error', n_jobs=-1)
+# %%
+cat_cv.fit(X_train, y_train)
 
 # %%
-rfr_cv.fit(X_train, y_train)
+best_cat_model = cat_cv.best_estimator_
 
 # %%
-rfr_cv.best_params_
+best_cat_model.fit(X_train, y_train)
 
 # %%
-best_rfr_model = rfr_cv.best_estimator_
+y_pred_cat = best_cat_model.predict(X_test)
 
 # %%
-best_rfr_model.fit(X_train, y_train)
-
-# %%
-y_pred_rfr = best_rfr_model.predict(X_test)
-
-# %%
-rmse_rfr = np.sqrt(mean_squared_error(y_test, y_pred_rfr))
-print(f"RSME: {rmse_rfr:.4f}")
+rmse_cat = np.sqrt(mean_squared_error(y_test, y_pred_cat))
+print(f"RSME: {rmse_cat:.4f}")
 
 # %%
 df_test_preprocess = pipeline.transform(test_df)
 
 # %%
-y_rfr = np.exp(best_rfr_model.predict(df_test_preprocess))
+y_cat = np.exp(best_cat_model.predict(df_test_preprocess))
 
-df_y_rfr_out = test_df[['Id']]
-df_y_rfr_out['SalePrice'] = y_rfr
-df_y_rfr_out.to_csv(SUBMISSIONS_DIR + 'random_forest.csv', index=False)
+df_y_cat_out = test_df[['Id']]
+df_y_cat_out['SalePrice'] = y_cat
+df_y_cat_out.to_csv(SUBMISSIONS_DIR + 'cat.csv', index=False)

@@ -570,9 +570,6 @@ lr.fit(X_train, y_train)
 y_pred_lr = lr.predict(X_test)
 
 # %%
-mean_squared_error(y_test, y_pred_lr)
-
-# %%
 rmse_lr = np.sqrt(mean_squared_error(y_test, y_pred_lr))
 print(f"RSME: {rmse_lr:.4f}")
 

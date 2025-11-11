@@ -28,9 +28,7 @@ from sklearn.pipeline import Pipeline, make_pipeline
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import OrdinalEncoder, StandardScaler, OneHotEncoder
 
-
-from sklearn.linear_model import LinearRegression, Ridge
-# from sklearn.linear_model import ElasticNet, Lasso # TODO
+from sklearn.linear_model import LinearRegression, Ridge, Lasso
 from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor, VotingRegressor, StackingRegressor
 from xgboost import XGBRegressor
 from catboost import CatBoostRegressor
@@ -560,44 +558,42 @@ X_train, X_test, y_train, y_test = train_test_split(
     X_preprocessed, y, test_size=0.2, random_state=25)
 
 # %%
-RFR = RandomForestRegressor(random_state=13)
+lasso = Lasso(max_iter=1000)
 
 # %%
-param_grid_RFR = {
-    'max_depth': [5, 10, 15],
-    'n_estimators': [100, 250, 500],
-    'min_samples_split': [3, 5, 10]
+param_grid_lasso = {
+    'alpha': np.logspace(-3, 1, 30)  # Search 30 values from 0.001 to 10
 }
 
 # %%
-rfr_cv = GridSearchCV(RFR, param_grid_RFR, cv=5,
-                      scoring='neg_mean_squared_error', n_jobs=-1)
+lasso_cv = GridSearchCV(lasso, param_grid_lasso, cv=5,
+                        scoring='neg_mean_squared_error', n_jobs=-1)
 
 # %%
-rfr_cv.fit(X_train, y_train)
+lasso_cv.fit(X_train, y_train)
 
 # %%
-rfr_cv.best_params_
+np.sqrt(-1 * lasso_cv.best_score_)
 
 # %%
-best_rfr_model = rfr_cv.best_estimator_
+best_lasso_model = lasso_cv.best_estimator_
 
 # %%
-best_rfr_model.fit(X_train, y_train)
+best_lasso_model.fit(X_train, y_train)
 
 # %%
-y_pred_rfr = best_rfr_model.predict(X_test)
+y_pred_lasso = best_lasso_model.predict(X_test)
 
 # %%
-rmse_rfr = np.sqrt(mean_squared_error(y_test, y_pred_rfr))
-print(f"RSME: {rmse_rfr:.4f}")
+rmse_lasso = np.sqrt(mean_squared_error(y_test, y_pred_lasso))
+print(f"RSME: {rmse_lasso:.4f}")
 
 # %%
 df_test_preprocess = pipeline.transform(test_df)
 
 # %%
-y_rfr = np.exp(best_rfr_model.predict(df_test_preprocess))
+y_lasso = np.exp(best_lasso_model.predict(df_test_preprocess))
 
-df_y_rfr_out = test_df[['Id']]
-df_y_rfr_out['SalePrice'] = y_rfr
-df_y_rfr_out.to_csv(SUBMISSIONS_DIR + 'random_forest.csv', index=False)
+df_y_lasso_out = test_df[['Id']]
+df_y_lasso_out['SalePrice'] = y_lasso
+df_y_lasso_out.to_csv(SUBMISSIONS_DIR + 'lasso.csv', index=False)

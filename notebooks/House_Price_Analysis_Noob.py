@@ -12,7 +12,7 @@
 #     name: python3
 # ---
 
-# %% [markdown]
+# %% [markdown] jp-MarkdownHeadingCollapsed=true
 # # Đồ án Phân tích & Dự đoán Giá nhà
 #
 # **Mục tiêu:**

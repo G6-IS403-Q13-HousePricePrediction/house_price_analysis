@@ -89,12 +89,26 @@ will affect the result equally.)
     RMSE: 0.13312882636583184
     Score: 0.14378
 2. RandomForestRegressor
+    RSME: 0.1403
+    Score: 0.14483
 3. XGBRegressor
-4. Ridge
-5. GradientBoostingRegressor
-6. LGBMRegressor
-7. Catboost
-8. VotingRegressor
-9. StackRegressor
-
-<!-- 02:44:00 -->
+    RSME: 0.1223
+    Score: 0.12907
+4. Lasso
+    RSME: 0.1227
+    Score: 0.13723
+5. Ridge
+    RSME: 0.1238
+    Score: 0.13639
+6. GradientBoostingRegressor
+    RSME: 0.1215
+    Score: 0.13011
+7. LGBMRegressor
+    - The gridsearchsv of this model takes long to train
+    RSME: 
+    Score:
+8. Catboost
+    RSME: 
+    Score:
+9. VotingRegressor
+10. StackRegressor

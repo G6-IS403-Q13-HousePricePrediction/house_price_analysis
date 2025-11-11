@@ -35,7 +35,7 @@ from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor, V
 from xgboost import XGBRegressor
 from catboost import CatBoostRegressor
 
-import lightgbm as lgb
+from lightgbm import LGBMRegressor
 
 # %%
 DATA_DIR = '../data/'
@@ -560,44 +560,42 @@ X_train, X_test, y_train, y_test = train_test_split(
     X_preprocessed, y, test_size=0.2, random_state=25)
 
 # %%
-RFR = RandomForestRegressor(random_state=13)
+lgbm_regressor = LGBMRegressor(verbose=-1)
 
 # %%
-param_grid_RFR = {
-    'max_depth': [5, 10, 15],
-    'n_estimators': [100, 250, 500],
-    'min_samples_split': [3, 5, 10]
+param_grid_lgbm = {
+    'boosting_type': ['gbdt', 'dart'],
+    'num_leaves': [20, 30, 40],
+    'learning_rate': [0.01, 0.05, 0.1],
+    'n_estimators': [100, 200, 300]
 }
 
 # %%
-rfr_cv = GridSearchCV(RFR, param_grid_RFR, cv=5,
-                      scoring='neg_mean_squared_error', n_jobs=-1)
+lgbm_cv = GridSearchCV(lgbm_regressor, param_grid_lgbm, cv=5,
+                       scoring='neg_mean_squared_error', n_jobs=-1)
 
 # %%
-rfr_cv.fit(X_train, y_train)
+lgbm_cv.fit(X_train, y_train)
 
 # %%
-rfr_cv.best_params_
+best_lgbm_model = lgbm_cv.best_estimator_
 
 # %%
-best_rfr_model = rfr_cv.best_estimator_
+best_lgbm_model.fit(X_train, y_train)
 
 # %%
-best_rfr_model.fit(X_train, y_train)
+y_pred_lgbm = best_lgbm_model.predict(X_test)
 
 # %%
-y_pred_rfr = best_rfr_model.predict(X_test)
-
-# %%
-rmse_rfr = np.sqrt(mean_squared_error(y_test, y_pred_rfr))
-print(f"RSME: {rmse_rfr:.4f}")
+rmse_lgbm = np.sqrt(mean_squared_error(y_test, y_pred_lgbm))
+print(f"RSME: {rmse_lgbm:.4f}")
 
 # %%
 df_test_preprocess = pipeline.transform(test_df)
 
 # %%
-y_rfr = np.exp(best_rfr_model.predict(df_test_preprocess))
+y_lgbm = np.exp(best_lgbm_model.predict(df_test_preprocess))
 
-df_y_rfr_out = test_df[['Id']]
-df_y_rfr_out['SalePrice'] = y_rfr
-df_y_rfr_out.to_csv(SUBMISSIONS_DIR + 'random_forest.csv', index=False)
+df_y_lgbm_out = test_df[['Id']]
+df_y_lgbm_out['SalePrice'] = y_lgbm
+df_y_lgbm_out.to_csv(SUBMISSIONS_DIR + 'lgbm.csv', index=False)

@@ -560,44 +560,47 @@ X_train, X_test, y_train, y_test = train_test_split(
     X_preprocessed, y, test_size=0.2, random_state=25)
 
 # %%
-RFR = RandomForestRegressor(random_state=13)
+gbr = GradientBoostingRegressor()
 
 # %%
-param_grid_RFR = {
-    'max_depth': [5, 10, 15],
-    'n_estimators': [100, 250, 500],
-    'min_samples_split': [3, 5, 10]
+param_grid_gbr = {
+    'max_depth': [12, 15, 20],
+    'n_estimators': [200, 300, 1000],
+    'min_samples_leaf': [10, 25, 50],
+    'learning_rate': [0.001, 0.01, 0.1],
+    'max_features': [0.01, 0.1, 0.7]
 }
 
 # %%
-rfr_cv = GridSearchCV(RFR, param_grid_RFR, cv=5,
+gbr_cv = GridSearchCV(gbr, param_grid_gbr, cv=5,
                       scoring='neg_mean_squared_error', n_jobs=-1)
 
 # %%
-rfr_cv.fit(X_train, y_train)
+gbr_cv.fit(X_train, y_train)
 
 # %%
-rfr_cv.best_params_
+gbr_cv.best_params_
+np.sqrt(-1 * gbr_cv.best_score_)
 
 # %%
-best_rfr_model = rfr_cv.best_estimator_
+best_gbr_model = gbr_cv.best_estimator_
 
 # %%
-best_rfr_model.fit(X_train, y_train)
+best_gbr_model.fit(X_train, y_train)
 
 # %%
-y_pred_rfr = best_rfr_model.predict(X_test)
+y_pred_gbr = best_gbr_model.predict(X_test)
 
 # %%
-rmse_rfr = np.sqrt(mean_squared_error(y_test, y_pred_rfr))
-print(f"RSME: {rmse_rfr:.4f}")
+rmse_gbr = np.sqrt(mean_squared_error(y_test, y_pred_gbr))
+print(f"RSME: {rmse_gbr:.4f}")
 
 # %%
 df_test_preprocess = pipeline.transform(test_df)
 
 # %%
-y_rfr = np.exp(best_rfr_model.predict(df_test_preprocess))
+y_gbr = np.exp(best_gbr_model.predict(df_test_preprocess))
 
-df_y_rfr_out = test_df[['Id']]
-df_y_rfr_out['SalePrice'] = y_rfr
-df_y_rfr_out.to_csv(SUBMISSIONS_DIR + 'random_forest.csv', index=False)
+df_y_gbr_out = test_df[['Id']]
+df_y_gbr_out['SalePrice'] = y_gbr
+df_y_gbr_out.to_csv(SUBMISSIONS_DIR + 'gbr.csv', index=False)
