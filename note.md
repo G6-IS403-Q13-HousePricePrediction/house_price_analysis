@@ -108,7 +108,7 @@ will affect the result equally.)
     RSME: 
     Score:
 8. Catboost
-    RSME: 
-    Score:
+    RSME: RSME: 0.1101
+    Score:0.11830
 9. VotingRegressor
 10. StackRegressor
