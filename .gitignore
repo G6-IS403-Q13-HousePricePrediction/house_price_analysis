@@ -25,3 +25,5 @@ wheels/
 
 # Python-LSP-Server cache
 .virtual_documents/
+
+submissions/

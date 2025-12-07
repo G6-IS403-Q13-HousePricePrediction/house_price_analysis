@@ -5,23 +5,54 @@ description = "House price analysis project"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-    "catboost>=1.2.8",
-    "jupyterlab>=4.4.10",
-    "jupytext>=1.18.1",
-    "lightgbm>=4.6.0",
-    "matplotlib>=3.10.7",
-    "numpy>=2.2.6",
+    # --- APP DEPENDENCIES (Go into Docker) ---
+    "streamlit>=1.51.0",
     "pandas>=2.3.3",
-    "scikit-learn>=1.7.2",
+    "numpy>=2.2.6",
+    "joblib>=1.5.2",
     "scipy>=1.15.3",
+    "matplotlib>=3.10.7",
     "seaborn>=0.13.2",
-    "xgboost>=3.1.1",
+    # "scikit-learn>=1.7.2",
+    # 2. Use the compatible Scikit-Learn (Before the strict breaking changes)
+    "scikit-learn==1.5.2",
+    # CRITICAL: Downgrade XGBoost locally to match Docker
+    "xgboost==2.0.3",
+    "lightgbm>=4.6.0",
+    "catboost>=1.2.8",
+    # Required for Nix building
+    "setuptools",
+    "wheel",
+    "py-cpuinfo>=9.0.0",
 ]
 
+# --- DEV DEPENDENCIES (Local Training Only) ---
+# uv2nix will ignore these when building the Docker image, saving space!
 [dependency-groups]
 dev = [
+    "jupyterlab>=4.4.10",
+    "jupyterlab-widgets>=3.0.16",
+    "ipywidgets>=8.1.8",
+    "jupytext>=1.18.1",
+    "optuna>=4.6.0", # Optuna is usually only needed for training
     "python-lsp-server[all]>=1.13.1",
 ]
 
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
 [tool.jupytext]
 formats = "notebooks//ipynb,notebooks//py:percent"
+
+[tool.setuptools.packages.find]
+where = ["."]
+# We explicitly tell setuptools to IGNORE these folders
+exclude = [
+    "data*",
+    "notebooks*",
+    "report*",
+    "saved_models*",
+    "saved_models_backup*",
+    "submissions*"
+]
