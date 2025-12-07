@@ -16,23 +16,6 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-st.markdown(
-    """
-    <style>
-        /* This hides the main header (including Deploy button and menu) */
-        header {visibility: hidden;}
-
-        /* This hides the hamburger menu specifically if the header rule
-        doesn't catch it */
-        #MainMenu {visibility: hidden;}
-
-        /* This optionally hides the footer */
-        footer {visibility: hidden;}
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
-
 MODEL_DIR = "saved_models"
 
 # Asset Loading System
